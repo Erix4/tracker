@@ -90,7 +90,7 @@ function checkMatch(list, url){
     return idx;
 }
 
-function reloadList(list){
+function reloadList(list){//each item stored as [display text, url, minute, info]
     document.getElementById("storeList").innerHTML = "";
     var showText;
     //
