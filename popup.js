@@ -8,13 +8,13 @@ chrome.storage.sync.get(["trackedSites"], async function(result) {
     storedSites = result.trackedSites;
     reloadList(storedSites);
     //
-    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });//get current tab information
     tabIdx = checkMatch(storedSites, tab.url);
     if(tabIdx == -1){
-        // When the button is clicked, inject setPageBackgroundColor into current page
-        updateButton.addEventListener("click", async () => addTab(tab), { once: true });
+        d3.select(updateButton).on('click', async () => addTab(tab), { once: true })
+        //updateButton.addEventListener("click", );
     }else{
-        document.getElementById("updateButton").innerHTML = "Delete";
+        d3.select("#updateButton").node().innerHTML = "Delete";
         document.getElementById("minute").value = storedSites[tabIdx][2];
         document.getElementById("info").value = storedSites[tabIdx][3];
         updateButton.addEventListener("click", async() => deleteTab(tab), { once: true });
@@ -62,14 +62,15 @@ function listAddition(title, url, minute, info){
             console.log('Element added ' + parsedTitle);
         });
         //
-        var showText = document.createElement("p");
-        showText.className = "listed";
-        document.getElementById("storeList").appendChild(showText);
+        var listItem = d3.select('#hidden').select('.listed').node().cloneNode(true);
+        document.getElementById("storeList").appendChild(listItem);
+        showText = d3.select(listItem).select('p').node();
         showText.innerText = parsedTitle;
-        showText.title = info;
-        //
-        showText.addEventListener("click", async() => openSite(storedSites[storedSites.length - 1]));
-        showText.addEventListener("dblclick", async() => googleThing(isolateTitle(title, url)));
+        //listItem.innerHTML = `${element[0]}<span class="material-icons down">keyboard_arrow_down</span><span class="material-icons up">keyboard_arrow_up</span>`;
+        listItem.title = info;
+        showText.addEventListener("click", async() => openSite([parsedTitle, url, minute, info, 0]));
+        d3.select(listItem).select('.up').on('click', async() => updatePoint(url, 1));
+        d3.select(listItem).select('.down').on('click', async() => updatePoint(url, -1));
     }else{//this should never be true
         storedSites[matchIdx][2] = minute;
         //
@@ -77,6 +78,17 @@ function listAddition(title, url, minute, info){
             console.log('updated title ' + title);
         });
     }
+}
+
+function updatePoint(url, num){
+    let matchIdx = checkMatch(storedSites, url);
+    if(matchIdx == -1) return;//,invalid function input
+    //
+    storedSites[matchIdx][4] = storedSites[matchIdx][4] + num;
+    storedSites.sort((a, b) => b[4] - a[4]);//sort list by points
+    reloadList(storedSites);
+    //
+    chrome.storage.sync.set({"trackedSites": storedSites});
 }
 
 function checkMatch(list, url){
@@ -91,16 +103,21 @@ function checkMatch(list, url){
 }
 
 function reloadList(list){//each item stored as [display text, url, minute, info]
-    document.getElementById("storeList").innerHTML = "";
+    document.getElementById("storeList").innerHTML = "";//ahh!
+    var listItem;
     var showText;
-    //
+    //change to sort by points:
     list.forEach(element => {
-        showText = document.createElement("p");
-        showText.className = "listed";
-        document.getElementById("storeList").appendChild(showText);
+        listItem = d3.select('#hidden').select('.listed').node().cloneNode(true);
+        listItem.style = `background-color: hsl(200, 100%, ${100 - element[4]}%)`;
+        document.getElementById("storeList").appendChild(listItem);
+        showText = d3.select(listItem).select('p').node();
         showText.innerText = element[0];
-        showText.title = element[3];
+        //listItem.innerHTML = `${element[0]}<span class="material-icons down">keyboard_arrow_down</span><span class="material-icons up">keyboard_arrow_up</span>`;
+        listItem.title = element[3];
         showText.addEventListener("click", async() => openSite(element));
+        d3.select(listItem).select('.up').on('click', async() => updatePoint(element[1], 1));
+        d3.select(listItem).select('.down').on('click', async() => updatePoint(element[1], -1));
     });
 }
 
@@ -146,6 +163,10 @@ function parseTitle(title, url){//goal: _title_, ep. _episode_
             [titleBuild, i] = buildTitle(1, "Episode", titleSplit);
             //
             return `${titleBuild}, ep. ${titleSplit[i+1]}`;
+        case "mydramalist"://format: _title_ ( _year_ ) - MyDramaList
+            [titleBuild, i] = buildTitle(0, "-", titleSplit, "(");
+            //
+            return `${titleBuild}`;
         case "www":
             switch(url.split("//")[1].split(".")[1]){
                 case "youtube"://format: _title_ - YouTube

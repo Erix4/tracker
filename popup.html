@@ -2,13 +2,19 @@
 <html>
   <head>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+    <script src="./d3.min.js"></script>
+    <!--<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>-->
   </head>
   <body>
-    <button id="updateButton" class="button">Store</button><i class="fa-solid fa-rotate-right"></i><button id="download" class="button">Download</button></br>
+    <button id="updateButton" class="button">Store</button><i class="fa-solid fa-rotate-right"></i><button id="download" class="button">Download</button><br/>
     <p id="minuteDisplay"></p>
-    <input id="minute" type="number" placeholder="minute" value="0"></input>
-    <input id="info" placeholder="info"></input>
-    <div id="storeList">
+    <input id="minute" type="number" placeholder="minute" value="0"/>
+    <input id="info" placeholder="info"/>
+    <div id="storeList"></div>
+    <div id="hidden">
+      <div class="listed"><p class="listText"></p><span class="material-icons down">keyboard_arrow_down</span><span class="material-icons up">keyboard_arrow_up</span></div>
     </div>
     <script src="popup.js"></script>
   </body>
