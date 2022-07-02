@@ -43,7 +43,7 @@ input{
     font-weight: bold;
     cursor: pointer;
     margin: 0;
-    padding: 10px;
+    padding: 0px;
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -56,10 +56,16 @@ input{
 
 .listText{
     margin: 0;
+    width: 100%;
+    border: 10px transparent solid;
+}
+
+.up{
+    border-right: 10px transparent solid;
 }
 
 .down{
-    margin-left: auto !important;
+    /*margin-left: auto !important;*/
 }
 
 span.material-icons{
